@@ -2,7 +2,7 @@
 
 namespace App\DataTables;
 
-use App\Models\User;
+use App\Models\Task;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
@@ -12,26 +12,32 @@ use Yajra\DataTables\Html\Editor\Editor;
 use Yajra\DataTables\Html\Editor\Fields;
 use Yajra\DataTables\Services\DataTable;
 
-class UsersDataTable extends DataTable
+class TasksDataTable extends DataTable
 {
     /**
      * Build the DataTable class.
      *
-     * @param QueryBuilder<User> $query Results from query() method.
+     * @param QueryBuilder<Task> $query Results from query() method.
      */
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
         return (new EloquentDataTable($query))
-            ->editColumn('created_at', function (User $user) {
-                return $user->created_at->format(config('app.datetime_format'));
+        ->editColumn('start_date', function (Task $task) {
+                return $task->created_at->format(config('app.date_format'));
             })
-            ->editColumn('updated_at', function (User $user) {
-                return $user->updated_at->format(config('app.datetime_format'));
+            ->editColumn('due_date', function (Task $task) {
+                return $task->updated_at->format(config('app.date_format'));
+            })
+            ->editColumn('created_at', function (Task $task) {
+                return $task->created_at->format(config('app.datetime_format'));
+            })
+            ->editColumn('updated_at', function (Task $task) {
+                return $task->updated_at->format(config('app.datetime_format'));
             })
             ->setRowId('id')
             ->addColumn('action', function ($user) {
-                $editUrl = route('users.edit', $user->id);
-                $deleteUrl = route('users.destroy', $user->id);
+                $editUrl = route('tasks.edit', $user->id);
+                $deleteUrl = route('tasks.destroy', $user->id);
                 $csrf = csrf_field();
                 $method = method_field('DELETE');
 
@@ -49,9 +55,9 @@ class UsersDataTable extends DataTable
     /**
      * Get the query source of dataTable.
      *
-     * @return QueryBuilder<User>
+     * @return QueryBuilder<Task>
      */
-    public function query(User $model): QueryBuilder
+    public function query(Task $model): QueryBuilder
     {
         return $model->newQuery();
     }
@@ -62,7 +68,7 @@ class UsersDataTable extends DataTable
     public function html(): HtmlBuilder
     {
         return $this->builder()
-                    ->setTableId('users-table')
+                    ->setTableId('tasks-table')
                     ->columns($this->getColumns())
                     ->minifiedAjax()
                     ->orderBy(1)
@@ -90,11 +96,12 @@ class UsersDataTable extends DataTable
             //       ->width(60)
             //       ->addClass('text-center'),
             Column::make('id'),
-            Column::make('name'),
-            Column::make('email'),
+            Column::make('title'),
+            Column::make('status_id'),
+            Column::make('start_date'),
+            Column::make('due_date'),
             Column::make('created_at'),
             Column::make('updated_at'),
-
         ];
     }
 
@@ -103,6 +110,6 @@ class UsersDataTable extends DataTable
      */
     protected function filename(): string
     {
-        return 'Users_' . date('YmdHis');
+        return 'Tasks_' . date('YmdHis');
     }
 }
